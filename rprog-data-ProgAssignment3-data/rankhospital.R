@@ -44,8 +44,8 @@ rankhospital <- function(state, outcome, num = "best") {
                 hospital <- dat$Name[order(dat$Rate, dat$Name)[num]]
         else 
                 hospital <- switch(num,
-                           best  = dat$Name[order(dat$Rate, dat$Name)[1]],
-                           worst = dat$Name[order(dat$Rate, dat$Name)[nrow(dat)]])
+                                   best  = dat$Name[order(dat$Rate, dat$Name)[1]],
+                                   worst = dat$Name[order(dat$Rate, dat$Name)[nrow(dat)]])
         
         hospital
 }
