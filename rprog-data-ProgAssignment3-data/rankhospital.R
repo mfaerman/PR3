@@ -1,49 +1,26 @@
 rankhospital <- function(state, outcome, num = "best") {
         ## Read outcome data
-        
-        ## Check that state and outcome are valid
         data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
         
         outcome_types <- c("heart attack", "heart failure", "pneumonia")
         
-        ## columns in input data containing outcome rates
-        cn <- c (11, 17, 23)
+        ## Hospital.Name column
+        cnm <- 2
         
-        ## create mapping from outcome type to column number
-        names(cn) <- outcome_types
+        ## columns in input data containing outcome rates
+        cor <- c (11, 17, 23)
+        
+        ## create mapping (dictionary) from outcome type to column number
+        names(cor) <- outcome_types
         
         ## Check that state and outcome are valid
         if(!(state %in% state.abb)) 
                 stop ("invalid state")
-        
         if(!(outcome %in% outcome_types))
                 stop ("invalid outcome")
         
         ## Return hospital name in that state with the given rank
         ## 30-day death rate
-}
-
-rankhospital <- function(state, outcome) {
-        ## Read outcome data
-        data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
-        
-        outcome_types <- c("heart attack", "heart failure", "pneumonia")
-        
-        ## columns in input data containing outcome rates
-        cn <- c (11, 17, 23)
-        
-        ## create mapping from outcome type to column number
-        names(cn) <- outcome_types
-        
-        ## Check that state and outcome are valid
-        if(!(state %in% state.abb)) 
-                stop ("invalid state")
-        
-        if(!(outcome %in% outcome_types))
-                stop ("invalid outcome")
-        
-        ## Return hospital name in that state with lowest 30-day death
-        ## rate
         
         data_split_by_state <- split(data, data$State)
         
@@ -51,17 +28,24 @@ rankhospital <- function(state, outcome) {
         data_selected_state <- data_split_by_state[[state]]
         
         ## Retrieve dataset column containing selected outcome type
-        cl <- cn[outcome]
+        cso <- cor[outcome]
         
         ## Convert outcome data from character vector to numeric
-        data_selected_state[ , cl] <- as.numeric(data_selected_state[ , cl])
+        data_selected_state[ , cso] <- as.numeric(data_selected_state[ , cso])
         
-        ## Save only dataset rows where outcome values are not NA
-        clean_outcomes <- data_selected_state[!is.na(data_selected_state[ , cl]), ]
+        ## Save only columns of interest
+        dat <- data_selected_state[, c(cnm, cso)]
+        names(dat) <- c("Name", "Rate")
         
-        best_hospital_outcome <- min(clean_outcomes[, cl])  
+        ## Remove rows with NA outcomes
+        dat <- dat[!is.na(dat$Rate), ]
         
-        list_best_hospitals <- clean_outcomes$Hospital.Name[clean_outcomes[, cl] == best_hospital_outcome]
+        if (is.numeric(num))
+                hospital <- dat$Name[order(dat$Rate, dat$Name)[num]]
+        else 
+                hospital <- switch(num,
+                           best  = dat$Name[order(dat$Rate, dat$Name)[1]],
+                           worst = dat$Name[order(dat$Rate, dat$Name)[nrow(dat)]])
         
-        min(list_best_hospitals)
+        hospital
 }
