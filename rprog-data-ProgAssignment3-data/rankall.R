@@ -45,10 +45,11 @@ rankall <- function(outcome, num = "best") {
         dat <- dat[!is.na(dat$Rate), ]
         
         ## For each state, find the hospital of the given rank
-        
         dst <- split(dat, dat$State)
-             
-        lapply(dst, rank, num)
+        
+        results <- sapply(dst, rank, num)
+        
         ## Return a data frame with the hospital names and the
         ## (abbreviated) state name
+        data.frame(hospital = results, state = names(results))
 }
