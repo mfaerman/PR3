@@ -4,11 +4,14 @@ best <- function(state, outcome) {
         
         outcome_types <- c("heart attack", "heart failure", "pneumonia")
         
+        ## Hospital.Name column
+        cnm <- 2
+        
         ## columns in input data containing outcome rates
-        cn <- c (11, 17, 23)
+        cor <- c (11, 17, 23)
         
         ## create mapping from outcome type to column number
-        names(cn) <- outcome_types
+        names(cor) <- outcome_types
         
         ## Check that state and outcome are valid
         if(!(state %in% state.abb)) 
@@ -26,17 +29,14 @@ best <- function(state, outcome) {
         data_selected_state <- data_split_by_state[[state]]
         
         ## Retrieve dataset column containing selected outcome type
-        cl <- cn[outcome]
+        cso <- cor[outcome]
         
         ## Convert outcome data from character vector to numeric
-        data_selected_state[ , cl] <- as.numeric(data_selected_state[ , cl])
+        data_selected_state[ , cso] <- as.numeric(data_selected_state[ , cso])
         
-        ## Save only dataset rows where outcome values are NA
-        clean_outcomes <- data_selected_state[!is.na(data_selected_state[ , cl]), ]
-        
-        best_hospital_outcome <- min(clean_outcomes[, cl])  
-        
-        list_best_hospitals <- clean_outcomes$Hospital.Name[clean_outcomes[, cl] == best_hospital_outcome]
-        
-        min(list_best_hospitals)
+        ## Save only columns of interest
+        dat <- data_selected_state[, c(cnm, cso)]
+        names(dat) <- c("Name", "Rate")
+
+        min(dat$Name[dat$Rate == min(dat$Rate, na.rm = TRUE)], na.rm = TRUE)
 }
